@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneTap Toolbox工具箱</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--header:#fff;--text:#1e293b;--text2:#475569;--border:#e2e8f0;--accent:#3b82f6;--accent2:#2563eb;--input:#fff;--inborder:#cbd5e1;--code:#f1f5f9;--shadow:0 4px 6px -1px rgba(0,0,0,.1);}
+body.dark{--bg:#0f172a;--card:#1e293b;--header:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--border:#334155;--accent:#3b82f6;--accent2:#60a5fa;--input:#1e293b;--inborder:#475569;--code:#0f172a;--shadow:0 4px 6px -1px rgba(0,0,0,.5);}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+body{background:var(--bg);color:var(--text);transition:.2s;min-height:100vh;display:flex;flex-direction:column;}
+.navbar{background:var(--header);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;}
+.nav-menu{display:flex;gap:1.5rem;align-items:center;}
+.nav-menu a{text-decoration:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:.2s;font-weight:500;}
+.nav-menu a:hover,.nav-menu a.active{color:var(--accent);}
+.search-box{display:flex;align-items:center;background:var(--input);border:1px solid var(--inborder);border-radius:40px;padding:.4rem 1rem;flex:1;max-width:260px;}
+.search-box i{color:var(--text2);margin-right:.5rem;}
+.search-box input{background:transparent;border:none;outline:none;color:var(--text);width:100%;font-size:.9rem;}
+.lang-switch{display:flex;gap:.25rem;align-items:center;background:var(--bg);padding:.2rem .4rem;border-radius:40px;border:1px solid var(--border);}
+.lang-btn{background:transparent;border:none;color:var(--text2);font-size:.72rem;font-weight:600;padding:.25rem .5rem;border-radius:20px;cursor:pointer;transition:.2s;}
+.lang-btn.active{background:var(--accent);color:#fff;}
+.theme-toggle{background:transparent;border:1px solid var(--border);border-radius:40px;padding:.4rem .75rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:.2s;}
+.theme-toggle:hover{background:var(--border);}
+main{flex:1;padding:2rem 1.5rem;max-width:1400px;margin:0 auto;width:100%;}
+.privacy-banner{background:var(--card);border:1px solid var(--border);border-radius:40px;padding:.6rem 1.5rem;display:inline-flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--text2);margin-bottom:1.5rem;box-shadow:var(--shadow);}
+.privacy-banner i{color:#10b981;}
+.category-title{font-size:1.2rem;margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:2px solid var(--accent);display:inline-block;font-weight:600;}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-bottom:2rem;}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:.15s;}
+.tool-card:hover{transform:translateY(-3px);}
+.tool-name{font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;}
+.tool-input,.tool-output{width:100%;padding:.6rem .75rem;border-radius:10px;border:1px solid var(--inborder);background:var(--input);color:var(--text);font-size:.85rem;font-family:Consolas,monospace;resize:vertical;margin-bottom:.5rem;}
+.tool-output{background:var(--code);}
+.tool-actions{display:flex;gap:.5rem;margin-top:.25rem;flex-wrap:wrap;}
+.btn-sm{background:var(--accent);border:none;color:#fff;padding:.4rem .8rem;border-radius:20px;font-size:.75rem;font-weight:500;cursor:pointer;transition:.2s;}
+.btn-sm:hover{background:var(--accent2);}
+.btn-sm.secondary{background:transparent;border:1px solid var(--accent);color:var(--accent);}
+.btn-sm.secondary:hover{background:var(--accent);color:#fff;}
+footer{text-align:center;padding:1.5rem;font-size:.8rem;color:var(--text2);border-top:1px solid var(--border);}
+.page-section{display:none;}
+.page-section.active{display:block;}
+.settings-card{background:var(--card);border-radius:16px;padding:1.5rem;border:1px solid var(--border);max-width:600px;}
+.settings-item{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem;}
+.settings-item:last-child{border-bottom:none;}
+.inline-group{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem;}
+.inline-group input,.inline-group select{flex:1;min-width:60px;padding:.4rem;border-radius:8px;border:1px solid var(--inborder);background:var(--input);color:var(--text);}
+@media(max-width:768px){.navbar{flex-direction:column;align-items:stretch;}.search-box{max-width:100%;}}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-menu" id="navMenu">
+    <a href="#" class="active" data-page="home"><i class="fas fa-home"></i> 首页</a>
+    <a href="#" data-page="settings"><i class="fas fa-cog"></i> 设置</a>
+    <a href="#" data-page="about"><i class="fas fa-info-circle"></i> 关于我们</a>
+  </div>
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" id="toolSearch" placeholder="搜索工具...">
+  </div>
+  <div class="lang-switch">
+    <button class="lang-btn active" data-lang="zh">中文</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="es">ES</button>
+    <button class="lang-btn" data-lang="ar">AR</button>
+    <button class="lang-btn" data-lang="ru">RU</button>
+  </div>
+  <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i> 深色</button>
+</header>
+
+<main>
+  <div class="privacy-banner">
+    <i class="fas fa-shield-alt"></i>
+    <span>所有数据仅在浏览器本地处理，不会上传到服务器。</span>
+  </div>
+
+  <!-- 首页 -->
+  <section id="page-home" class="page-section active">
+
+    <h2 class="category-title">数据格式与转换</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-code"></i> JSON 格式化/压缩/校验</div>
+        <textarea class="tool-input" id="jsonInput" rows="3" placeholder='{"name":"toolbox"}'></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="formatJSON()">格式化</button>
+          <button class="btn-sm secondary" onclick="minifyJSON()">压缩</button>
+          <button class="btn-sm secondary" onclick="validateJSON()">校验</button>
+        </div>
+        <textarea class="tool-output" id="jsonOutput" rows="3" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-database"></i> SQL 格式化</div>
+        <textarea class="tool-input" id="sqlInput" rows="3" placeholder="select * from users where id=1"></textarea>
+        <button class="btn-sm" onclick="formatSQL()">格式化</button>
+        <textarea class="tool-output" id="sqlOutput" rows="3" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-calculator"></i> 进制转换</div>
+        <div class="inline-group">
+          <input type="text" id="radixInput" value="255">
+          <select id="radixFrom"><option value="10">10</option><option value="2">2</option><option value="8">8</option><option value="16">16</option></select>
+          <span>→</span>
+          <select id="radixTo"><option value="2">2</option><option value="8">8</option><option value="10">10</option><option value="16">16</option></select>
+        </div>
+        <button class="btn-sm" onclick="convertRadix()">转换</button>
+        <textarea class="tool-output" id="radixOutput" rows="1" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-weight-hanging"></i> 字节转换</div>
+        <div class="inline-group">
+          <input type="number" id="byteValue" value="1024">
+          <select id="byteFrom"><option>B</option><option>KB</option><option>MB</option><option>GB</option></select>
+          <span>→</span>
+          <select id="byteTo"><option>KB</option><option>MB</option><option>GB</option><option>B</option></select>
+        </div>
+        <button class="btn-sm" onclick="convertBytes()">转换</button>
+        <textarea class="tool-output" id="byteOutput" rows="1" readonly></textarea>
+      </div>
+    </div>
+
+    <h2 class="category-title">文本处理</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-font"></i> 大小写/命名风格</div>
+        <textarea class="tool-input" id="caseInput" rows="2" placeholder="hello world"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="toUpper()">大写</button>
+          <button class="btn-sm" onclick="toLower()">小写</button>
+          <button class="btn-sm" onclick="toCamel()">camelCase</button>
+          <button class="btn-sm" onclick="toSnake()">snake_case</button>
+        </div>
+        <textarea class="tool-output" id="caseOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-sort-numeric-up"></i> 字数统计</div>
+        <textarea class="tool-input" id="countInput" rows="2"></textarea>
+        <button class="btn-sm" onclick="countStats()">统计</button>
+        <textarea class="tool-output" id="countOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-asterisk"></i> 正则表达式测试</div>
+        <input type="text" id="regexPattern" class="tool-input" value="\d+" placeholder="正则">
+        <textarea class="tool-input" id="regexText" rows="2" placeholder="测试文本 123 abc 456"></textarea>
+        <button class="btn-sm" onclick="testRegex()">测试</button>
+        <textarea class="tool-output" id="regexOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-filter"></i> 去重 / 排序 / 去空行</div>
+        <textarea class="tool-input" id="dedupInput" rows="2" placeholder="一行一条"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="dedupLines()">去重</button>
+          <button class="btn-sm secondary" onclick="sortLines()">排序</button>
+          <button class="btn-sm secondary" onclick="removeEmptyLines()">去空行</button>
+        </div>
+        <textarea class="tool-output" id="dedupOutput" rows="2" readonly></textarea>
+      </div>
+    </div>
+
+    <h2 class="category-title">编码与加密</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-lock"></i> Base64 编解码</div>
+        <textarea class="tool-input" id="base64Input" rows="2"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="base64Encode()">编码</button>
+          <button class="btn-sm secondary" onclick="base64Decode()">解码</button>
+        </div>
+        <textarea class="tool-output" id="base64Output" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-link"></i> URL 编解码</div>
+        <textarea class="tool-input" id="urlInput" rows="2"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="urlEncode()">编码</button>
+          <button class="btn-sm secondary" onclick="urlDecode()">解码</button>
+        </div>
+        <textarea class="tool-output" id="urlOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-code"></i> HTML 实体编解码</div>
+        <textarea class="tool-input" id="htmlEntityInput" rows="2"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="htmlEntityEncode()">编码</button>
+          <button class="btn-sm secondary" onclick="htmlEntityDecode()">解码</button>
+        </div>
+        <textarea class="tool-output" id="htmlEntityOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-hashtag"></i> SHA 哈希</div>
+        <textarea class="tool-input" id="hashInput" rows="2" placeholder="输入文本"></textarea>
+        <div class="tool-actions">
+          <button class="btn-sm" onclick="computeHash('SHA-1')">SHA1</button>
+          <button class="btn-sm" onclick="computeHash('SHA-256')">SHA256</button>
+          <button class="btn-sm" onclick="computeHash('SHA-512')">SHA512</button>
+        </div>
+        <textarea class="tool-output" id="hashOutput" rows="2" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-id-card"></i> JWT 解析</div>
+        <textarea class="tool-input" id="jwtInput" rows="2" placeholder="eyJ..."></textarea>
+        <button class="btn-sm" onclick="parseJWT()">解析</button>
+        <textarea class="tool-output" id="jwtOutput" rows="3" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-file"></i> 文件 SHA256</div>
+        <input type="file" id="fileHashInput" class="tool-input">
+        <button class="btn-sm" onclick="computeFileHash()">计算</button>
+        <textarea class="tool-output" id="fileHashOutput" rows="2" readonly></textarea>
+      </div>
+    </div>
+
+    <h2 class="category-title">生成与解析</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-fingerprint"></i> UUID 生成</div>
+        <button class="btn-sm" onclick="generateUUID()">生成 UUID</button>
+        <textarea class="tool-output" id="uuidOutput" rows="1" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-user-secret"></i> 随机密码</div>
+        <div class="inline-group">
+          <input type="number" id="pwdLength" value="16" min="4" max="64">
+          <button class="btn-sm" onclick="generatePassword()">生成</button>
+        </div>
+        <textarea class="tool-output" id="passwordOutput" rows="1" readonly></textarea>
+      </div>
+    </div>
+
+    <h2 class="category-title">时间与网络</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-calendar-alt"></i> 时间戳转换</div>
+        <div class="inline-group">
+          <input type="number" id="timestampInput" value="1700000000">
+          <button class="btn-sm" onclick="timestampToDate()">→ 日期</button>
+          <button class="btn-sm secondary" onclick="dateToTimestamp()">当前</button>
+        </div>
+        <textarea class="tool-output" id="timestampOutput" rows="1" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-plus-minus"></i> 日期计算</div>
+        <div class="inline-group">
+          <input type="date" id="dateStart">
+          <input type="number" id="dateDays" value="30">
+        </div>
+        <button class="btn-sm" onclick="addDays()">加天数</button>
+        <textarea class="tool-output" id="dateCalcOutput" rows="1" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-link"></i> URL 解析</div>
+        <input type="text" id="urlParseInput" class="tool-input" value="https://example.com/path?name=test#hash">
+        <button class="btn-sm" onclick="parseURL()">解析</button>
+        <textarea class="tool-output" id="urlParseOutput" rows="4" readonly></textarea>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-name"><i class="fas fa-sitemap"></i> CIDR 计算</div>
+        <input type="text" id="cidrInput" class="tool-input" value="192.168.1.0/24">
+        <button class="btn-sm" onclick="calcCIDR()">计算</button>
+        <textarea class="tool-output" id="cidrOutput" rows="2" readonly></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- 设置 -->
+  <section id="page-settings" class="page-section">
+    <div class="settings-card">
+      <h2 style="margin-bottom:1rem;">设置</h2>
+      <div class="settings-item">
+        <span>深色模式</span>
+        <button class="btn-sm" onclick="toggleDark()">切换</button>
+      </div>
+      <div class="settings-item">
+        <span>清除本地记录</span>
+        <button class="btn-sm secondary" onclick="clearHistory()">清除</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 关于 -->
+  <section id="page-about" class="page-section">
+    <div class="settings-card">
+      <h2>关于我们</h2>
+      <p style="margin-top:1rem;line-height:1.7;">
+        <strong>全能工具箱</strong> 是一个纯前端工具集合，所有计算都在浏览器本地完成，不经过任何服务器。<br><br>
+        • 隐私优先：数据不上传<br>
+        • 本地存储：主题/语言保存在 localStorage<br>
+        • 纯前端实现，可离线使用
+	——制作者:K011Apse ( GitHub | X | Discord )
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>© 2025 全能工具箱 · 纯前端 · 隐私优先</footer>
+
+<script>
+// ===== 主题切换 =====
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  var isDark = document.body.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i> 浅色' : '<i class="fas fa-moon"></i> 深色';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleDark);
+if(localStorage.getItem('theme') === 'dark'){
+  document.body.classList.add('dark');
+  document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i> 浅色';
+}
+
+// ===== 导航切换 =====
+document.querySelectorAll('#navMenu a').forEach(function(a){
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    var page = a.dataset.page;
+    document.querySelectorAll('#navMenu a').forEach(function(x){x.classList.remove('active');});
+    a.classList.add('active');
+    document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
+    document.getElementById('page-' + page).classList.add('active');
+  });
+});
+
+// ===== 语言切换 =====
+document.querySelectorAll('.lang-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.lang-btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    localStorage.setItem('lang', b.dataset.lang);
+  });
+});
+
+// ===== 搜索 =====
+document.getElementById('toolSearch').addEventListener('input', function(e){
+  var q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('#page-home .tool-card').forEach(function(card){
+    var text = card.querySelector('.tool-name').textContent.toLowerCase();
+    card.style.display = text.indexOf(q) > -1 ? '' : 'none';
+  });
+});
+
+// ===== 通用工具 =====
+function $(id){return document.getElementById(id);}
+
+// --- JSON ---
+function formatJSON(){
+  try{
+    var v = JSON.parse($('jsonInput').value);
+    $('jsonOutput').value = JSON.stringify(v, null, 2);
+  }catch(e){$('jsonOutput').value = '❌ ' + e.message;}
+}
+function minifyJSON(){
+  try{
+    var v = JSON.parse($('jsonInput').value);
+    $('jsonOutput').value = JSON.stringify(v);
+  }catch(e){$('jsonOutput').value = '❌ ' + e.message;}
+}
+function validateJSON(){
+  try{JSON.parse($('jsonInput').value); $('jsonOutput').value = '✅ JSON 合法';}
+  catch(e){$('jsonOutput').value = '❌ ' + e.message;}
+}
+
+// --- SQL 格式化（简易） ---
+function formatSQL(){
+  var sql = $('sqlInput').value.trim();
+  if(!sql){$('sqlOutput').value='请输入SQL';return;}
+  var keywords = ['SELECT','FROM','WHERE','AND','OR','ORDER BY','GROUP BY','HAVING','LIMIT','INSERT','INTO','VALUES','UPDATE','SET','DELETE','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','ON','AS'];
+  var result = sql;
+  keywords.forEach(function(kw){
+    var re = new RegExp('\\b' + kw.replace(/ /g,'\\s+') + '\\b', 'gi');
+    result = result.replace(re, '\n' + kw);
+  });
+  result = result.replace(/\n\s+/g, '\n').trim();
+  $('sqlOutput').value = result;
+}
+
+// --- 进制转换 ---
+function convertRadix(){
+  var val = $('radixInput').value.trim();
+  var from = parseInt($('radixFrom').value);
+  var to = parseInt($('radixTo').value);
+  try{
+    var num = parseInt(val, from);
+    if(isNaN(num)){throw new Error('无效数字');}
+    $('radixOutput').value = num.toString(to).toUpperCase();
+  }catch(e){$('radixOutput').value = '❌ ' + e.message;}
+}
+
+// --- 字节转换 ---
+function convertBytes(){
+  var v = parseFloat($('byteValue').value);
+  var from = $('byteFrom').value;
+  var to = $('byteTo').value;
+  var units = {B:1, KB:1024, MB:1024*1024, GB:1024*1024*1024};
+  if(isNaN(v)){$('byteOutput').value='❌ 无效数字';return;}
+  var bytes = v * units[from];
+  $('byteOutput').value = (bytes / units[to]).toFixed(4) + ' ' + to;
+}
+
+// --- 大小写 ---
+function toUpper(){$('caseOutput').value = $('caseInput').value.toUpperCase();}
+function toLower(){$('caseOutput').value = $('caseInput').value.toLowerCase();}
+function toCamel(){
+  var s = $('caseInput').value.trim();
+  s = s.replace(/[-_\s]+(.)?/g, function(m,c){return c?c.toUpperCase():'';});
+  s = s.charAt(0).toLowerCase() + s.slice(1);
+  $('caseOutput').value = s;
+}
+function toSnake(){
+  var s = $('caseInput').value.trim();
+  s = s.replace(/([A-Z])/g,'_$1').replace(/[-\s]+/g,'_').toLowerCase().replace(/^_/,'');
+  $('caseOutput').value = s;
+}
+
+// --- 字数统计 ---
+function countStats(){
+  var t = $('countInput').value;
+  var chars = t.length;
+  var charsNoSpace = t.replace(/\s/g,'').length;
+  var words = t.trim() ? t.trim().split(/\s+/).length : 0;
+  var lines = t.split('\n').length;
+  var cjk = (t.match(/[\u4e00-\u9fa5]/g)||[]).length;
+  $('countOutput').value = '字符(含空格): '+chars+'\n字符(不含空格): '+charsNoSpace+'\n单词/词: '+words+'\n行数: '+lines+'\n中文字符: '+cjk;
+}
+
+// --- 正则测试 ---
+function testRegex(){
+  var pattern = $('regexPattern').value;
+  var text = $('regexText').value;
+  try{
+    var re = new RegExp(pattern, 'g');
+    var matches = text.match(re);
+    $('regexOutput').value = matches ? '匹配到 ' + matches.length + ' 处:\n' + matches.join(', ') : '无匹配';
+  }catch(e){$('regexOutput').value = '❌ ' + e.message;}
+}
+
+// --- 去重/排序/去空行 ---
+function dedupLines(){
+  var lines = $('dedupInput').value.split('\n');
+  var seen = {}, result = [];
+  lines.forEach(function(l){if(!seen[l]){seen[l]=1;result.push(l);}});
+  $('dedupOutput').value = result.join('\n');
+}
+function sortLines(){
+  var lines = $('dedupInput').value.split('\n');
+  lines.sort();
+  $('dedupOutput').value = lines.join('\n');
+}
+function removeEmptyLines(){
+  var lines = $('dedupInput').value.split('\n').filter(function(l){return l.trim()!=='';});
+  $('dedupOutput').value = lines.join('\n');
+}
+
+// --- Base64 ---
+function base64Encode(){
+  try{
+    $('base64Output').value = btoa(unescape(encodeURIComponent($('base64Input').value)));
+  }catch(e){$('base64Output').value = '❌ ' + e.message;}
+}
+function base64Decode(){
+  try{
+    $('base64Output').value = decodeURIComponent(escape(atob($('base64Input').value)));
+  }catch(e){$('base64Output').value = '❌ ' + e.message;}
+}
+
+// --- URL ---
+function urlEncode(){$('urlOutput').value = encodeURIComponent($('urlInput').value);}
+function urlDecode(){
+  try{$('urlOutput').value = decodeURIComponent($('urlInput').value);}
+  catch(e){$('urlOutput').value = '❌ ' + e.message;}
+}
+
+// --- HTML 实体 ---
+function htmlEntityEncode(){
+  var t = $('htmlEntityInput').value;
+  $('htmlEntityOutput').value = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function htmlEntityDecode(){
+  var t = $('htmlEntityInput').value;
+  var div = document.createElement('div');
+  div.innerHTML = t;
+  $('htmlEntityOutput').value = div.textContent || div.innerText || '';
+}
+
+// --- 哈希（Web Crypto） ---
+async function computeHash(algo){
+  var text = $('hashInput').value;
+  var buf = new TextEncoder().encode(text);
+  var hashBuf = await crypto.subtle.digest(algo, buf);
+  var hashArr = Array.from(new Uint8Array(hashBuf));
+  $('hashOutput').value = hashArr.map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+// --- 文件哈希 ---
+async function computeFileHash(){
+  var file = $('fileHashInput').files[0];
+  if(!file){$('fileHashOutput').value = '请选择文件';return;}
+  var buf = await file.arrayBuffer();
+  var hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  var hashArr = Array.from(new Uint8Array(hashBuf));
+  $('fileHashOutput').value = hashArr.map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+// --- JWT 解析 ---
+function parseJWT(){
+  var token = $('jwtInput').value.trim();
+  var parts = token.split('.');
+  if(parts.length !== 3){$('jwtOutput').value = '❌ JWT 格式错误，应为3段';return;}
+  try{
+    var header = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
+    var payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    $('jwtOutput').value = 'Header:\n' + JSON.stringify(header, null, 2) + '\n\nPayload:\n' + JSON.stringify(payload, null, 2);
+  }catch(e){$('jwtOutput').value = '❌ ' + e.message;}
+}
+
+// --- UUID ---
+function generateUUID(){
+  if(crypto.randomUUID){
+    $('uuidOutput').value = crypto.randomUUID();
+  }else{
+    $('uuidOutput').value = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+      var r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8);
+      return v.toString(16);
+    });
+  }
+}
+
+// --- 随机密码 ---
+function generatePassword(){
+  var len = parseInt($('pwdLength').value) || 16;
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}';
+  var pwd = '';
+  var arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  for(var i=0;i<len;i++){pwd += chars[arr[i] % chars.length];}
+  $('passwordOutput').value = pwd;
+}
+
+// --- 时间戳 ---
+function timestampToDate(){
+  var ts = parseInt($('timestampInput').value);
+  if(isNaN(ts)){$('timestampOutput').value='❌ 无效时间戳';return;}
+  var d = new Date(ts * 1000);
+  $('timestampOutput').value = d.toLocaleString() + ' | ISO: ' + d.toISOString();
+}
+function dateToTimestamp(){
+  $('timestampInput').value = Math.floor(Date.now()/1000);
+  $('timestampOutput').value = '已填入当前时间戳（秒）';
+}
+
+// --- 日期计算 ---
+function addDays(){
+  var d = $('dateStart').value;
+  var n = parseInt($('dateDays').value);
+  if(!d){$('dateCalcOutput').value='请选择日期';return;}
+  var date = new Date(d);
+  date.setDate(date.getDate() + n);
+  $('dateCalcOutput').value = date.toISOString().slice(0,10);
+}
+
+// --- URL 解析 ---
+function parseURL(){
+  try{
+    var u = new URL($('urlParseInput').value);
+    var out = '协议: ' + u.protocol + '\n';
+    out += '主机: ' + u.hostname + '\n';
+    out += '端口: ' + (u.port || '默认') + '\n';
+    out += '路径: ' + u.pathname + '\n';
+    out += '查询: ' + u.search + '\n';
+    out += 'Hash: ' + u.hash;
+    $('urlParseOutput').value = out;
+  }catch(e){
+    $('urlParseOutput').value = '❌ ' + e.message;
+  }
+}
+
+// 保证脚本正常关闭
+</script>
+
+<script>
+// ===== Full i18n system =====
+(function(){
+const dict={
+zh:{
+"首页":"首页","设置":"设置","关于我们":"关于我们","搜索工具...":"搜索工具...",
+"深色":"深色","浅色":"浅色","清空":"清空","复制":"复制","计算":"计算","解析":"解析",
+"生成":"生成","转换":"转换","格式化":"格式化","校验":"校验"
+},
+en:{
+"首页":"Home","设置":"Settings","关于我们":"About Us","搜索工具...":"Search tools...",
+"深色":"Dark","浅色":"Light","清空":"Clear","复制":"Copy","计算":"Calculate","解析":"Parse",
+"生成":"Generate","转换":"Convert","格式化":"Format","校验":"Validate"
+},
+es:{
+"首页":"Inicio","设置":"Configuración","关于我们":"Sobre nosotros","搜索工具...":"Buscar herramientas...",
+"深色":"Oscuro","浅色":"Claro","清空":"Limpiar","复制":"Copiar","计算":"Calcular","解析":"Analizar",
+"生成":"Generar","转换":"Convertir","格式化":"Formatear","校验":"Validar"
+},
+ar:{
+"首页":"الرئيسية","设置":"الإعدادات","关于我们":"معلومات عنا","搜索工具...":"بحث الأدوات...",
+"深色":"داكن","浅色":"فاتح","清空":"مسح","复制":"نسخ","计算":"حساب","解析":"تحليل",
+"生成":"إنشاء","转换":"تحويل","格式化":"تنسيق","校验":"تحقق"
+},
+ru:{
+"首页":"Главная","设置":"Настройки","关于我们":"О нас","搜索工具...":"Поиск инструментов...",
+"深色":"Темный","浅色":"Светлый","清空":"Очистить","复制":"Копировать","计算":"Рассчитать","解析":"Разобрать",
+"生成":"Создать","转换":"Конвертировать","格式化":"Форматировать","校验":"Проверить"
+}
+};
+let current="zh";
+let original=new Map();
+
+function collect(){
+ document.querySelectorAll("body *").forEach(e=>{
+   if(e.children.length===0 && e.textContent.trim()){
+    original.set(e,e.textContent.trim());
+   }
+   if(e.placeholder) original.set(e,"@@"+e.placeholder);
+ });
+}
+
+function apply(lang){
+ current=lang;
+ original.forEach((v,e)=>{
+   if(!e) return;
+   let text=v.startsWith("@@")?v.substring(2):v;
+   let t=dict[lang][text];
+   if(v.startsWith("@@")) {
+     if(t) e.placeholder=t;
+   } else if(t) {
+     e.textContent=t;
+   }
+ });
+ localStorage.setItem("language",lang);
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+ collect();
+ document.querySelectorAll(".lang-btn").forEach(b=>{
+   b.addEventListener("click",()=>apply(b.dataset.lang));
+ });
+ let l=localStorage.getItem("language")||"zh";
+ apply(l);
+});
+})();
+</script>
+</body>
+</html>
